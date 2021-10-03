@@ -176,15 +176,15 @@ func postPayload(cookies []*http.Cookie, payload string) (*ResponseJson, error) 
 	}
 	return reqBody, nil
 }
-func post(user *User, group *sync.WaitGroup) {
+func post(user User, group *sync.WaitGroup) {
 	defer group.Done()
 	time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
-	cookie, err := login(user)
+	cookie, err := login(&user)
 	if err != nil {
 		log.Printf("An error \"%v\"was encountered while login %+v", err, user)
 		return
 	}
-	payload := makePostPayload(user)
+	payload := makePostPayload(&user)
 	reqBody, err := postPayload(cookie, payload)
 	if err != nil {
 		log.Printf("An error \"%v\"was encountered while post %v", err, user.Username)
@@ -217,7 +217,7 @@ func main() {
 	}
 	waitGroup.Add(len(users))
 	for _, user := range users {
-		go post(&user, &waitGroup)
+		go post(user, &waitGroup)
 	}
 	waitGroup.Wait()
 }

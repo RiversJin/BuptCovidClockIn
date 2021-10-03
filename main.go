@@ -9,12 +9,15 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
 )
 
 const (
+	// LogName 日志文件名称
+	LogName = "covid.log"
 	// FileName 用户配置文件
 	FileName = "user.json"
 	// IndexUrl 初始页
@@ -195,6 +198,17 @@ func post(user *User, group *sync.WaitGroup) {
 }
 
 func main() {
+	logfile, err := os.OpenFile(LogName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer func(logfile *os.File) {
+		err := logfile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(logfile)
+	log.SetOutput(logfile)
 	waitGroup := sync.WaitGroup{}
 	rand.Seed(time.Now().Unix())
 	users, err := readUsersFromFile(FileName)
